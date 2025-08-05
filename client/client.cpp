@@ -4,6 +4,6 @@
 int main()
 {
     Client client; 
-    client.run(); 
-
+    client.launch(); 
+    client.getRenderer()->run(); 
 }

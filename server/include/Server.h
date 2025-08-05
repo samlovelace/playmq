@@ -7,6 +7,7 @@
 #include "RateController.hpp"
 #include "Player.h"
 
+#include <nlohmann/json.hpp>
 #include <zmq.hpp>
 
 class Server 
@@ -22,10 +23,12 @@ private:
     zmq::context_t mContext; 
 
     std::vector<std::thread> mThreads; 
+    std::vector<std::string> mGames; 
 
-    zmq::socket_t mJoinSocket; 
-    RateController mJoinPollRate; 
-    void clientConnectionHandle();
+    zmq::socket_t mClientResponseSocket; 
+    RateController mRequestPollRate; 
+    void clientRequestHandleLoop();
+    bool handleRequest(const zmq::message_t& aRequest, nlohmann::json& aResponse);
 
     std::vector<std::unique_ptr<Player>> mPlayers; 
 

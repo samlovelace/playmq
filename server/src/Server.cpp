@@ -1,9 +1,8 @@
 
 #include "Server.h"
 #include <iostream>
-#include <nlohmann/json.hpp>
 
-Server::Server() : mContext(1), mIsRunning(true), mJoinPollRate(10)
+Server::Server() : mContext(1), mIsRunning(true), mRequestPollRate(10), mGames({"Snake", "Tanks", "Test"})
 {
 
 }
@@ -21,7 +20,7 @@ Server::~Server()
 
 void Server::run()
 {
-    mThreads.push_back(std::thread(&Server::clientConnectionHandle, this)); 
+    mThreads.push_back(std::thread(&Server::clientRequestHandleLoop, this)); 
 
     while(isRunning())
     {
@@ -29,37 +28,57 @@ void Server::run()
     }
 }
 
-void Server::clientConnectionHandle()
+void Server::clientRequestHandleLoop()
 {
-    mJoinSocket = zmq::socket_t(mContext, zmq::socket_type::rep); 
+    mClientResponseSocket = zmq::socket_t(mContext, zmq::socket_type::rep); 
     // TODO: make configurable IP/Port and Poll Rate
     
     std::string addr = "tcp://127.0.0.1:5555";
-    mJoinSocket.bind(addr); 
+    mClientResponseSocket.bind(addr); 
     std::cout << "Listening for connections on: " << addr << std::endl; 
 
     while(isRunning())
     {
-        mJoinPollRate.start(); 
+        mRequestPollRate.start(); 
 
         zmq::message_t request; 
-        mJoinSocket.recv(request); 
+        mClientResponseSocket.recv(request); 
 
-        std::cout << "Recvd: " << request.to_string() << std::endl; 
+        nlohmann::json response; 
+        if(!handleRequest(request, response))
+        {
+            std::cout << "Failed to handle request for: " << request.to_string() << std::endl; 
+            continue; 
+        } 
 
-        int playerId = mPlayers.size() + 1; 
-        auto player = std::make_unique<Player>(playerId); 
-        mPlayers.push_back(std::move(player));
-        
-        nlohmann::json response;
-        response["action"] = "accepted"; 
-        response["playerId"] = playerId; 
+        mClientResponseSocket.send(zmq::buffer(response.dump(2)), zmq::send_flags::none);
 
-        mJoinSocket.send(zmq::buffer(response.dump(2)), zmq::send_flags::none);
-        
-        std::cout << "Accepted Player " << playerId << "\n"; 
-
-        mJoinPollRate.block(); 
+        mRequestPollRate.block(); 
     }
 
+}
+
+bool Server::handleRequest(const zmq::message_t& aRequest, nlohmann::json& aResponse)
+{
+    nlohmann::json reqJson = nlohmann::json::parse(aRequest.to_string()); 
+
+    if("available_games" == reqJson["request"])
+    {
+        aResponse["response"] = reqJson["request"];
+        auto games = nlohmann::json::array(); 
+
+        for(const auto& gameName : mGames)
+        {
+            games.push_back(gameName); 
+        }
+
+        aResponse["games"] = games; 
+    }
+    else
+    {
+        std::cout << "request not supported" << std::endl; 
+        return false; 
+    }
+
+    return true; 
 }
