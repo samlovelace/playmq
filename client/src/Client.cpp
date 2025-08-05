@@ -1,6 +1,7 @@
 
 #include "Client.h"
 #include <iostream> 
+#include <thread> 
 
 Client::Client() : mContext(1)
 {
@@ -27,5 +28,10 @@ void Client::run()
 
     std::cout << "Response from server: " << reply.to_string() << std::endl; 
 
+    while(true)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }    
+    
 }
 

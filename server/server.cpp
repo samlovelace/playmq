@@ -1,4 +1,3 @@
-#include <zmq.hpp>
 
 #include "Server.h"
 

@@ -1,6 +1,7 @@
 
 #include "Server.h"
 #include <iostream>
+#include <nlohmann/json.hpp>
 
 Server::Server() : mContext(1), mIsRunning(true), mJoinPollRate(10)
 {
@@ -45,9 +46,18 @@ void Server::clientConnectionHandle()
         mJoinSocket.recv(request); 
 
         std::cout << "Recvd: " << request.to_string() << std::endl; 
+
+        int playerId = mPlayers.size() + 1; 
+        auto player = std::make_unique<Player>(playerId); 
+        mPlayers.push_back(std::move(player));
         
-        std::string reply = "accepted";
-        mJoinSocket.send(zmq::buffer(reply), zmq::send_flags::none);
+        nlohmann::json response;
+        response["action"] = "accepted"; 
+        response["playerId"] = playerId; 
+
+        mJoinSocket.send(zmq::buffer(response.dump(2)), zmq::send_flags::none);
+        
+        std::cout << "Accepted Player " << playerId << "\n"; 
 
         mJoinPollRate.block(); 
     }

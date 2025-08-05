@@ -5,6 +5,7 @@
 #include <thread> 
 #include <atomic> 
 #include "RateController.hpp"
+#include "Player.h"
 
 #include <zmq.hpp>
 
@@ -25,6 +26,8 @@ private:
     zmq::socket_t mJoinSocket; 
     RateController mJoinPollRate; 
     void clientConnectionHandle();
+
+    std::vector<std::unique_ptr<Player>> mPlayers; 
 
 
     std::atomic<bool> mIsRunning; 

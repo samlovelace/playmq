@@ -5,6 +5,7 @@ set(SERVER_TARGET_NAME server)
 set(SERVER_SOURCES
     server.cpp
     src/Server.cpp
+    src/Player.cpp
 )
 
 add_executable(${SERVER_TARGET_NAME} ${SERVER_SOURCES})
