@@ -1,8 +1,10 @@
 
 #include "Renderer.h"
+#include "MenuScreen.h"
 
-Renderer::Renderer()
+Renderer::Renderer(std::shared_ptr<InputHandler> aHandler) : mActiveScreen(0), mInputHandler(aHandler)
 {
+    mScreens.push_back(std::make_unique<MenuScreen>());
 }
 
 Renderer::~Renderer()
@@ -23,14 +25,27 @@ void Renderer::run()
             {
                 mWindow.close(); 
             }
+
+            mInputHandler->handle(e); 
         }
 
-        mWindow.clear(sf::Color::Blue); 
+        mScreens.at(mActiveScreen)->update(); 
 
-        //mWindow.draw(); 
-
+        // the active screen is responsible for calling mWindow.clear() if desired 
+        mScreens.at(mActiveScreen)->draw(mWindow); 
+        
         mWindow.display(); 
     } 
+}
 
+void Renderer::setAvailableGames(nlohmann::json& aSetOfGames)
+{
+    std::vector<std::string> games; 
 
+    for(const auto& game : aSetOfGames["games"])
+    {
+        games.push_back(game); 
+    }
+
+    static_cast<MenuScreen*>(mScreens.at(0).get())->setGames(games);
 }

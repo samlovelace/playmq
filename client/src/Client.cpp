@@ -4,9 +4,10 @@
 #include <thread> 
 #include <nlohmann/json.hpp>
 
-Client::Client() : mContext(1), mRenderer(std::make_shared<Renderer>())
+Client::Client() : mContext(1)
 {
-
+    mInputHandler = std::make_shared<InputHandler>(); 
+    mRenderer = std::make_shared<Renderer>(mInputHandler); 
 }
 
 Client::~Client()
@@ -36,7 +37,8 @@ void Client::launch()
     zmq::message_t reply; 
     mReqJoinSocket.recv(reply, zmq::recv_flags::none); // blocks until recvs 
 
-    std::cout << "Response from server: " << reply.to_string() << std::endl; 
+    nlohmann::json games = nlohmann::json::parse(reply.to_string()); 
+    mRenderer->setAvailableGames(games); 
 
     mThreads.push_back(std::thread(&Client::run, this)); 
 }

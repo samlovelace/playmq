@@ -7,6 +7,8 @@ find_package(SFML REQUIRED COMPONENTS system window graphics )
 set(CLIENT_SOURCES
     client.cpp
     src/Client.cpp
+    src/InputHandler.cpp
+    src/MenuScreen.cpp
     src/Renderer.cpp
 )
 

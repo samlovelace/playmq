@@ -5,6 +5,7 @@
 #include <vector> 
 #include <thread> 
 #include "Renderer.h"
+#include "InputHandler.h"
  
 class Client 
 { 
@@ -24,6 +25,7 @@ private:
     zmq::socket_t mReqJoinSocket; 
 
     std::shared_ptr<Renderer> mRenderer; 
+    std::shared_ptr<InputHandler> mInputHandler; 
 
     std::vector<std::thread> mThreads; 
 
