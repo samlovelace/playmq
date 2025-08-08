@@ -38,5 +38,5 @@ void InputHandler::registerCallback(sf::Event::EventType type, Callback callback
 void InputHandler::onKeyPressed(const sf::Event& anEvent)
 {
     if (anEvent.key.code == sf::Keyboard::Escape)
-            std::cout << "Escape pressed!\n";
+        std::cout << "Escape pressed!\n";
 }
