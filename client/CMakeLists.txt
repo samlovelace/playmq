@@ -10,6 +10,7 @@ set(CLIENT_SOURCES
     src/InputHandler.cpp
     src/MenuScreen.cpp
     src/Renderer.cpp
+    src/TankGameScreen.cpp
 )
 
 add_executable(${CLIENT_TARGET_NAME} ${CLIENT_SOURCES})

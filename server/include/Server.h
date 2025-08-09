@@ -35,6 +35,9 @@ private:
 
     std::atomic<bool> mIsRunning; 
     bool isRunning() {return mIsRunning.load(); }
+
+    void tankGameLoop(); 
+    void broadcastGameLoop(); 
    
 };
 #endif //SERVER_H

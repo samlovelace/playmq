@@ -1,5 +1,6 @@
 
 #include "MenuScreen.h"
+#include <iostream> 
 
 MenuScreen::MenuScreen()
 {
@@ -17,6 +18,11 @@ bool MenuScreen::update()
     {
 
     }
+}
+
+bool MenuScreen::handleInput(sf::Event& anEvent)
+{
+    // check which button was clicked or something to select game 
 }
 
 bool MenuScreen::draw(sf::RenderWindow& aWindow)

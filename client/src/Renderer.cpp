@@ -1,10 +1,12 @@
 
 #include "Renderer.h"
 #include "MenuScreen.h"
+#include "TankGameScreen.h"
 
-Renderer::Renderer(std::shared_ptr<InputHandler> aHandler) : mActiveScreen(0), mInputHandler(aHandler)
+Renderer::Renderer(std::shared_ptr<InputHandler> aHandler) : mActiveScreen(1), mInputHandler(aHandler)
 {
     mScreens.push_back(std::make_unique<MenuScreen>());
+    mScreens.push_back(std::make_unique<TankGameScreen>()); 
 }
 
 Renderer::~Renderer()
@@ -26,7 +28,7 @@ void Renderer::run()
                 mWindow.close(); 
             }
 
-            mInputHandler->handle(e); 
+            mScreens.at(mActiveScreen)->handleInput(e);  
         }
 
         mScreens.at(mActiveScreen)->update(); 

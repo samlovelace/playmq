@@ -9,6 +9,7 @@ public:
     MenuScreen();
     ~MenuScreen(); 
 
+    bool handleInput(sf::Event& anEvent) override; 
     bool update() override; 
     bool draw(sf::RenderWindow& aWindow) override; 
 

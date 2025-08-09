@@ -30,15 +30,26 @@ void Client::launch()
     mReqJoinSocket.connect(addr);
 
     nlohmann::json request; 
-    request["request"] = "available_games"; 
+    //request["request"] = "available_games"; 
+    request["request"] = "join"; 
+    request["game"] = "tank"; 
 
     mReqJoinSocket.send(zmq::buffer(request.dump()), zmq::send_flags::none);
 
     zmq::message_t reply; 
     mReqJoinSocket.recv(reply, zmq::recv_flags::none); // blocks until recvs 
 
-    nlohmann::json games = nlohmann::json::parse(reply.to_string()); 
-    mRenderer->setAvailableGames(games); 
+    nlohmann::json replyJson = nlohmann::json::parse(reply.to_string()); 
+
+    if(replyJson["join"] == "success")
+    {
+        std::cout << "Joining the game...\n";
+
+        // launch thread to hear game state
+        mThreads.push_back(std::thread(&Client::gameStateRecvLoop, this)); 
+
+        // launch thread to publish user input to server 
+    }
 
     mThreads.push_back(std::thread(&Client::run, this)); 
 }
@@ -48,6 +59,30 @@ void Client::run()
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::seconds(1)); 
+    }
+}
+
+void Client::gameStateRecvLoop()
+{
+    zmq::socket_t gameStateRecv = zmq::socket_t(mContext, zmq::socket_type::sub); 
+    std::string addr = "tcp://127.0.0.1:5556";
+    gameStateRecv.connect(addr); 
+    gameStateRecv.set(zmq::sockopt::subscribe, "state");
+
+    while(true)
+    {
+        zmq::message_t topic_msg;
+        zmq::message_t data_msg;
+
+        // Receive topic
+        gameStateRecv.recv(topic_msg, zmq::recv_flags::none);
+        std::string topic(static_cast<char*>(topic_msg.data()), topic_msg.size());
+
+        // Receive message
+        gameStateRecv.recv(data_msg, zmq::recv_flags::none);
+        std::string data(static_cast<char*>(data_msg.data()), data_msg.size());
+
+        std::cout << "[" << topic << "] " << data << "\n";
     }
 }
 

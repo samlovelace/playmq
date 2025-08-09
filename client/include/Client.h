@@ -20,6 +20,7 @@ public:
 private:
 
     void run(); 
+    void gameStateRecvLoop(); 
 
     zmq::context_t mContext; 
     zmq::socket_t mReqJoinSocket; 
