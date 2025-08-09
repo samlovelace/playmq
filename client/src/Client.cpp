@@ -27,6 +27,7 @@ void Client::launch()
     mReqJoinSocket = zmq::socket_t(mContext, zmq::socket_type::req);
 
     std::string addr = "tcp://" + mServerIp + ":5555";
+    std::cout << "Connecting to server on " << addr << "\n"; 
     mReqJoinSocket.connect(addr);
 
     nlohmann::json request; 
