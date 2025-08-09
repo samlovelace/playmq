@@ -17,4 +17,10 @@ struct PlayerState
 
         return json; 
     }
+
+    static PlayerState fromJson(nlohmann::json& aJson)
+    {
+        PlayerState state(aJson["id"], aJson["x"], aJson["y"]); 
+        return state; 
+    }
 };

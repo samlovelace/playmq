@@ -128,7 +128,8 @@ void Server::broadcastGameLoop()
     std::string topic = "state"; 
 
     PlayerState playerState(0, 0, 0); 
-    auto stateToPublish = nlohmann::json::array(); 
+    nlohmann::json players; 
+    auto stateToPublish = nlohmann::json::array();
 
     while(isRunning())
     {
@@ -143,9 +144,10 @@ void Server::broadcastGameLoop()
                 stateToPublish.push_back(playerState.toJson());
             }
 
-            std::cout << "sending game state " << std::endl; 
+            players["players"] = stateToPublish; 
+
             gameStatePublisher.send(zmq::buffer(topic), zmq::send_flags::sndmore); 
-            gameStatePublisher.send(zmq::buffer(stateToPublish.dump(2)), zmq::send_flags::dontwait);
+            gameStatePublisher.send(zmq::buffer(players.dump(2)), zmq::send_flags::dontwait);
         }
 
         broadcastRate->block(); 

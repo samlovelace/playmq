@@ -15,5 +15,4 @@ Player::~Player()
 bool Player::update()
 {   
     mState.x += 1; 
-    std::cout << "Updating player " << mId << std::endl; 
 }

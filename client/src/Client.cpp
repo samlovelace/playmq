@@ -4,7 +4,7 @@
 #include <thread> 
 #include <nlohmann/json.hpp>
 
-Client::Client() : mContext(1)
+Client::Client(const std::string& aServerIp) : mContext(1), mServerIp(aServerIp)
 {
     mInputHandler = std::make_shared<InputHandler>(); 
     mRenderer = std::make_shared<Renderer>(mInputHandler); 
@@ -26,7 +26,7 @@ void Client::launch()
     // connect to server and request available games
     mReqJoinSocket = zmq::socket_t(mContext, zmq::socket_type::req);
 
-    std::string addr = "tcp://127.0.0.1:5555";
+    std::string addr = "tcp://" + mServerIp + ":5555";
     mReqJoinSocket.connect(addr);
 
     nlohmann::json request; 
@@ -65,7 +65,7 @@ void Client::run()
 void Client::gameStateRecvLoop()
 {
     zmq::socket_t gameStateRecv = zmq::socket_t(mContext, zmq::socket_type::sub); 
-    std::string addr = "tcp://127.0.0.1:5556";
+    std::string addr = "tcp://" + mServerIp + ":5556";
     gameStateRecv.connect(addr); 
     gameStateRecv.set(zmq::sockopt::subscribe, "state");
 
@@ -80,9 +80,15 @@ void Client::gameStateRecvLoop()
 
         // Receive message
         gameStateRecv.recv(data_msg, zmq::recv_flags::none);
-        std::string data(static_cast<char*>(data_msg.data()), data_msg.size());
+        nlohmann::json replyJson = nlohmann::json::parse(data_msg.to_string());
 
-        std::cout << "[" << topic << "] " << data << "\n";
+        mPlayerSates.clear(); 
+        
+        for(auto& player : replyJson["players"])
+        {
+            mPlayerSates.push_back(PlayerState::fromJson(player)); 
+        }
+        
     }
 }
 
