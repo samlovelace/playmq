@@ -32,7 +32,7 @@ private:
     void clientRequestHandleLoop();
     bool handleRequest(const zmq::message_t& aRequest, nlohmann::json& aResponse);
 
-    std::vector<std::unique_ptr<Player>> mPlayers; 
+    std::map<int, std::unique_ptr<Player>> mPlayers; 
 
 
     std::atomic<bool> mIsRunning; 

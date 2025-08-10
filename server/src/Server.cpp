@@ -83,13 +83,28 @@ bool Server::handleRequest(const zmq::message_t& aRequest, nlohmann::json& aResp
             //TODO: add player to game
             int id = mPlayers.size() + 1; 
             auto player = std::make_unique<Player>(id); 
-            mPlayers.push_back(std::move(player)); 
+            mPlayers.insert({id, std::move(player)}); 
 
             std::cout << "Added player " << id << "\n"; 
 
             aResponse["join"] = "success"; 
             aResponse["id"] = id; 
         }
+    }
+    else if ("disconnect" == reqJson["request"])
+    {
+        int clientId = reqJson["id"]; 
+
+        if(mPlayers.find(clientId) != mPlayers.end())
+        {
+            // client exists, remove
+            mPlayers.erase(clientId); 
+        }
+
+        aResponse["disconnect"] = "success"; 
+        aResponse["message"] = "rest in peace homie";   
+        
+        std::cout << "Removed Player " << clientId << "\n"; 
     }
     else
     {
@@ -108,7 +123,7 @@ void Server::tankGameLoop()
     {
         gameRate->start(); 
 
-        for(auto& player : mPlayers)
+        for(auto& [id, player] : mPlayers)
         {
             player->update(); 
         }
@@ -137,7 +152,7 @@ void Server::broadcastGameLoop()
 
         if(!mPlayers.empty())
         {
-            for(auto& player : mPlayers)
+            for(auto& [id, player] : mPlayers)
             {
                 playerState = player->getState(); 
 

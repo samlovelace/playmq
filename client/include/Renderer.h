@@ -34,6 +34,9 @@ private:
     void updateLatestGameState();
     void render(); 
 
+    bool isPlayerKnown(int aPlayerId);
+    void addPlayer(int aPlayerId); 
+
     std::map<int, sf::RectangleShape> mPlayerShapesMap; 
 
 };

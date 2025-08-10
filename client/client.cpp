@@ -15,4 +15,6 @@ int main(int argc, char* argv[])
     Client client(serverIp); 
     client.launch(); 
     client.getRenderer()->run(); 
+
+    client.kill(); 
 }

@@ -23,7 +23,7 @@ void Renderer::run()
         sf::Event e; 
         while(mWindow.pollEvent(e))
         {
-            if(e.type == sf::Event::Closed)
+            if(e.type == sf::Event::Closed || sf::Keyboard::Escape == e.key.code)
             {
                 mWindow.close(); 
             }
@@ -54,17 +54,10 @@ void Renderer::updateLatestGameState()
 {
     for(const auto& player : mLatestGameState)
     {
-
         // TODO: is there a better spot to put this? I feel like i need to check it every update loop
-        if(mPlayerShapesMap.find(player.id) == mPlayerShapesMap.end())
+        if(!isPlayerKnown(player.id))
         {
-            // player isnt in the map, add the player 
-            sf::RectangleShape newPlayer = sf::RectangleShape(sf::Vector2f(10, 10));
-            
-            // TODO: determine this on the server side, add to playerState? Doesnt need to be sent every time though
-            newPlayer.setFillColor(sf::Color::Blue); 
-
-            mPlayerShapesMap.insert({player.id, newPlayer}); 
+            addPlayer(player.id); 
         }
 
         mPlayerShapesMap[player.id].setPosition(sf::Vector2f(player.x, player.y)); 
@@ -77,4 +70,25 @@ void Renderer::render()
     {
         mWindow.draw(playerShape); 
     }
+}
+
+bool Renderer::isPlayerKnown(int aPlayerId)
+{
+    if(mPlayerShapesMap.find(aPlayerId) == mPlayerShapesMap.end())
+    {
+        return false; 
+    }
+    
+    return true; 
+}
+
+void Renderer::addPlayer(int aPlayerId)
+{
+    // player isnt in the map, add the player 
+    sf::RectangleShape newPlayer = sf::RectangleShape(sf::Vector2f(10, 10));
+    
+    // TODO: determine this on the server side, add to playerState? Doesnt need to be sent every time though
+    newPlayer.setFillColor(sf::Color::Blue); 
+
+    mPlayerShapesMap.insert({aPlayerId, newPlayer}); 
 }

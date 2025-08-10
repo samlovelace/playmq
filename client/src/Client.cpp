@@ -4,7 +4,7 @@
 #include <thread> 
 #include <nlohmann/json.hpp>
 
-Client::Client(const std::string& aServerIp) : mContext(1), mServerIp(aServerIp)
+Client::Client(const std::string& aServerIp) : mContext(1), mServerIp(aServerIp), mId(-1)
 {
     mInputHandler = std::make_shared<InputHandler>(); 
     mRenderer = std::make_shared<Renderer>(mInputHandler); 
@@ -47,13 +47,33 @@ void Client::launch()
     {
         std::cout << "Joining the game...\n";
 
+        mId = replyJson["id"]; 
+
         // launch thread to hear game state
         mThreads.push_back(std::thread(&Client::gameStateRecvLoop, this)); 
 
         // launch thread to publish user input to server 
     }
 
-    mThreads.push_back(std::thread(&Client::run, this)); 
+    //mThreads.push_back(std::thread(&Client::run, this)); 
+}
+
+void Client::kill()
+{
+    std::cout << "Killing client....\n"; 
+    mIsRunning = false; 
+    
+    nlohmann::json request; 
+    request["request"] = "disconnect"; 
+    request["id"] = mId; 
+    mReqJoinSocket.send(zmq::buffer(request.dump()), zmq::send_flags::none); 
+
+    zmq::message_t reply; 
+    mReqJoinSocket.recv(reply, zmq::recv_flags::none); // blocks until recvs 
+
+    nlohmann::json replyJson = nlohmann::json::parse(reply.to_string());
+
+    std::cout << "Server says: " << replyJson["message"] << std::endl; 
 }
 
 void Client::run()
@@ -71,7 +91,7 @@ void Client::gameStateRecvLoop()
     gameStateRecv.connect(addr); 
     gameStateRecv.set(zmq::sockopt::subscribe, "state");
 
-    while(true)
+    while(isRunning())
     {
         zmq::message_t topic_msg;
         zmq::message_t data_msg;
