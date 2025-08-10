@@ -1,3 +1,6 @@
+#ifndef PLAYERSTATE_HPP
+#define PLAYERSTATE_HPP
+
 #include <nlohmann/json.hpp>
 
 struct PlayerState
@@ -24,3 +27,5 @@ struct PlayerState
         return state; 
     }
 };
+
+#endif

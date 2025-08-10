@@ -13,12 +13,14 @@
 class Server 
 { 
 public:
-    Server();
+    Server(const std::string& anIP);
     ~Server();
 
     void run(); 
 
 private:
+
+    std::string mIP; 
 
     zmq::context_t mContext; 
 

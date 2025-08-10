@@ -2,7 +2,7 @@
 #include "Server.h"
 #include <iostream>
 
-Server::Server() : mContext(1), mIsRunning(true), mRequestPollRate(10), mGames({"Snake", "Tanks", "Test"})
+Server::Server(const std::string& anIP) : mContext(1), mIP(anIP), mIsRunning(true), mRequestPollRate(10), mGames({"Snake", "Tanks", "Test"})
 {
 
 }
@@ -35,7 +35,7 @@ void Server::clientRequestHandleLoop()
     mClientResponseSocket = zmq::socket_t(mContext, zmq::socket_type::rep); 
     // TODO: make configurable IP/Port and Poll Rate
     
-    std::string addr = "tcp://127.0.0.1:5555";
+    std::string addr = "tcp://" +  mIP + ":5555";
     mClientResponseSocket.bind(addr); 
     std::cout << "Listening for connections on: " << addr << std::endl; 
 
@@ -122,7 +122,7 @@ void Server::broadcastGameLoop()
     RateController* broadcastRate = new RateController(5); 
 
     auto gameStatePublisher = zmq::socket_t(mContext, zmq::socket_type::pub); 
-    std::string addr = "tcp://127.0.0.1:5556";
+    std::string addr = "tcp://" +  mIP + ":5556";
     gameStatePublisher.bind(addr);
 
     std::string topic = "state"; 

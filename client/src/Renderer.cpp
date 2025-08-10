@@ -28,14 +28,12 @@ void Renderer::run()
                 mWindow.close(); 
             }
 
-            mScreens.at(mActiveScreen)->handleInput(e);  
+            mInputHandler->handle(e); 
         }
 
-        mScreens.at(mActiveScreen)->update(); 
-
-        // the active screen is responsible for calling mWindow.clear() if desired 
-        mScreens.at(mActiveScreen)->draw(mWindow); 
-        
+        mWindow.clear(sf::Color::Black); 
+        updateLatestGameState(); 
+        render(); 
         mWindow.display(); 
     } 
 }
@@ -50,4 +48,33 @@ void Renderer::setAvailableGames(nlohmann::json& aSetOfGames)
     }
 
     static_cast<MenuScreen*>(mScreens.at(0).get())->setGames(games);
+}
+
+void Renderer::updateLatestGameState()
+{
+    for(const auto& player : mLatestGameState)
+    {
+
+        // TODO: is there a better spot to put this? I feel like i need to check it every update loop
+        if(mPlayerShapesMap.find(player.id) == mPlayerShapesMap.end())
+        {
+            // player isnt in the map, add the player 
+            sf::RectangleShape newPlayer = sf::RectangleShape(sf::Vector2f(10, 10));
+            
+            // TODO: determine this on the server side, add to playerState? Doesnt need to be sent every time though
+            newPlayer.setFillColor(sf::Color::Blue); 
+
+            mPlayerShapesMap.insert({player.id, newPlayer}); 
+        }
+
+        mPlayerShapesMap[player.id].setPosition(sf::Vector2f(player.x, player.y)); 
+    }
+}
+
+void Renderer::render()
+{
+    for(const auto& [id, playerShape] : mPlayerShapesMap)
+    {
+        mWindow.draw(playerShape); 
+    }
 }

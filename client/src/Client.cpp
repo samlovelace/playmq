@@ -12,6 +12,7 @@ Client::Client(const std::string& aServerIp) : mContext(1), mServerIp(aServerIp)
 
 Client::~Client()
 {
+
     for(auto& t : mThreads)
     {
         if(t.joinable())
@@ -89,7 +90,8 @@ void Client::gameStateRecvLoop()
         {
             mPlayerSates.push_back(PlayerState::fromJson(player)); 
         }
-        
+
+        mRenderer->setLatestGameState(mPlayerSates);        
     }
 }
 
