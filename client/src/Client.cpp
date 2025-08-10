@@ -4,7 +4,7 @@
 #include <thread> 
 #include <nlohmann/json.hpp>
 
-Client::Client(const std::string& aServerIp) : mContext(1), mServerIp(aServerIp), mId(-1)
+Client::Client(const std::string& aServerIp) : mContext(1), mServerIp(aServerIp), mId(-1), mIsRunning(true)
 {
     mInputHandler = std::make_shared<InputHandler>(); 
     mRenderer = std::make_shared<Renderer>(mInputHandler); 
@@ -62,7 +62,7 @@ void Client::kill()
 {
     std::cout << "Killing client....\n"; 
     mIsRunning = false; 
-    
+
     nlohmann::json request; 
     request["request"] = "disconnect"; 
     request["id"] = mId; 
