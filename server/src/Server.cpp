@@ -22,7 +22,8 @@ void Server::run()
 {
     mThreads.push_back(std::thread(&Server::clientRequestHandleLoop, this)); 
     mThreads.push_back(std::thread(&Server::tankGameLoop, this)); 
-    mThreads.push_back(std::thread(&Server::broadcastGameLoop, this)); 
+    mThreads.push_back(std::thread(&Server::broadcastGameLoop, this));
+    mThreads.push_back(std::thread(&Server::clientInputRecvLoop, this));  
 
     while(isRunning())
     {
@@ -167,4 +168,29 @@ void Server::broadcastGameLoop()
 
         broadcastRate->block(); 
     }
+}
+
+// TODO: find a way to avoid always sending all input frames. Feel like I
+//       only need to send when it changes? 
+void Server::clientInputRecvLoop()
+{
+    zmq::socket_t clientInputRecvSocket = zmq::socket_t(mContext, zmq::socket_type::pull); 
+    std::string addr = "tcp://" + mIP + ":5557"; 
+    clientInputRecvSocket.bind(addr); 
+
+    RateController* clientInputRecvRate = new RateController(10); 
+
+    while(isRunning())
+    {
+        clientInputRecvRate->start(); 
+
+        zmq::message_t input; 
+        clientInputRecvSocket.recv(input, zmq::recv_flags::none);
+
+        std::string data(static_cast<char*>(input.data()), input.size());
+        std::cout << "Received: " << data << std::endl;
+
+        clientInputRecvRate->block(); 
+    }
+
 }

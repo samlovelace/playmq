@@ -3,6 +3,7 @@
 #include <iostream> 
 #include <thread> 
 #include <nlohmann/json.hpp>
+#include "RateController.hpp"
 
 Client::Client(const std::string& aServerIp) : mContext(1), mServerIp(aServerIp), mId(-1), mIsRunning(true)
 {
@@ -53,6 +54,7 @@ void Client::launch()
         mThreads.push_back(std::thread(&Client::gameStateRecvLoop, this)); 
 
         // launch thread to publish user input to server 
+        mThreads.push_back(std::thread(&Client::sendUserInputLoop, this)); 
     }
 
     //mThreads.push_back(std::thread(&Client::run, this)); 
@@ -115,3 +117,36 @@ void Client::gameStateRecvLoop()
     }
 }
 
+void Client::sendUserInputLoop()
+{
+    zmq::socket_t inputSendSocket = zmq::socket_t(mContext, zmq::socket_type::push); 
+    std::string addr = "tcp://" + mServerIp + ":5557"; 
+    inputSendSocket.connect(addr); 
+
+    RateController* inputSendRate = new RateController(10); 
+    
+    while(isRunning())
+    {
+        inputSendRate->start(); 
+
+        // get latest user input from renderer
+        InputFrame latest = mRenderer->getLatestUserInput();
+
+        if(-1 == latest.clientId)
+        {
+            latest.clientId = mId; 
+        }
+
+        
+
+
+        nlohmann::json frame = latest.toJson(); 
+
+        // convert to zmq buffer and send 
+        inputSendSocket.send(zmq::buffer(frame.dump()), zmq::send_flags::none);
+        
+        inputSendRate->block(); 
+    }
+
+    delete inputSendRate; 
+}

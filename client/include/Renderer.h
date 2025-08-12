@@ -20,6 +20,8 @@ public:
     void setAvailableGames(nlohmann::json& aMapOfGames); 
     void setLatestGameState(const std::vector<PlayerState> aGameState) {std::lock_guard<std::mutex> lock(mGameStateMtx); mLatestGameState = aGameState;}
 
+    InputFrame getLatestUserInput();
+
 private:
 
     sf::RenderWindow mWindow; 

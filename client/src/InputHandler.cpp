@@ -7,7 +7,6 @@ InputHandler::InputHandler()
     registerCallback(sf::Event::EventType::KeyPressed, std::bind(&InputHandler::onKeyPressed, 
                                                                 this, 
                                                                 std::placeholders::_1)); 
-
 }
 
 InputHandler::~InputHandler()
@@ -37,6 +36,36 @@ void InputHandler::registerCallback(sf::Event::EventType type, Callback callback
 
 void InputHandler::onKeyPressed(const sf::Event& anEvent)
 {
-    if (anEvent.key.code == sf::Keyboard::Escape)
-        std::cout << "Escape pressed!\n";
+    InputFrame frame; 
+
+    if(sf::Keyboard::Up == anEvent.key.code)
+    {
+        frame.moveY -= 1; 
+    }
+    
+    if(sf::Keyboard::Down == anEvent.key.code)
+    {
+        frame.moveY += 1; 
+    }
+
+    if(sf::Keyboard::Left == anEvent.key.code)
+    {
+        frame.moveX -= 1; 
+    }
+
+    if(sf::Keyboard::Right == anEvent.key.code)
+    {
+        frame.moveX += 1; 
+    }
+
+    mLatestInput = frame; 
+}
+
+InputFrame InputHandler::getLatestInput()
+{
+    InputFrame copy = mLatestInput; 
+    InputFrame frame; 
+    mLatestInput = frame; 
+    
+    return copy; 
 }

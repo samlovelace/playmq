@@ -92,3 +92,8 @@ void Renderer::addPlayer(int aPlayerId)
 
     mPlayerShapesMap.insert({aPlayerId, newPlayer}); 
 }
+
+InputFrame Renderer::getLatestUserInput()
+{
+    return mInputHandler->getLatestInput(); 
+}

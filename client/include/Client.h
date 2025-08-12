@@ -24,6 +24,7 @@ private:
 
     void run(); 
     void gameStateRecvLoop(); 
+    void sendUserInputLoop();
 
     bool isRunning() {return mIsRunning; }
 

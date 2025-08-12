@@ -40,6 +40,7 @@ private:
 
     void tankGameLoop(); 
     void broadcastGameLoop(); 
+    void clientInputRecvLoop(); 
    
 };
 #endif //SERVER_H
