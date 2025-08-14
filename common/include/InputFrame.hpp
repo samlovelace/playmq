@@ -6,6 +6,7 @@
 struct InputFrame 
 {
     InputFrame() : clientId(-1), moveX(0), moveY(0) {}
+    InputFrame(int id, int x, int y) : clientId(id), moveX(x), moveY(y) {}
 
     //uint32_t seq;
     int clientId;
@@ -23,6 +24,11 @@ struct InputFrame
         frame["moveY"] = moveY;  
 
         return frame; 
+    }
+
+    static InputFrame fromJson(const nlohmann::json& aJson)
+    {
+        return InputFrame(aJson["clientId"], aJson["moveX"], aJson["moveY"]); 
     }
 
 };

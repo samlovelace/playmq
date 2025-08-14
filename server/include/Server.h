@@ -41,6 +41,8 @@ private:
     void tankGameLoop(); 
     void broadcastGameLoop(); 
     void clientInputRecvLoop(); 
+
+    bool setPlayersLatestInput(const InputFrame& anInput);
    
 };
 #endif //SERVER_H

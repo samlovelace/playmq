@@ -1,6 +1,7 @@
 
 #include "Server.h"
 #include <iostream>
+#include "InputFrame.hpp"
 
 Server::Server(const std::string& anIP) : mContext(1), mIP(anIP), mIsRunning(true), mRequestPollRate(10), mGames({"Snake", "Tanks", "Test"})
 {
@@ -81,7 +82,6 @@ bool Server::handleRequest(const zmq::message_t& aRequest, nlohmann::json& aResp
     {
         if("tank" == reqJson["game"])
         {
-            //TODO: add player to game
             int id = mPlayers.size() + 1; 
             auto player = std::make_unique<Player>(id); 
             mPlayers.insert({id, std::move(player)}); 
@@ -118,7 +118,7 @@ bool Server::handleRequest(const zmq::message_t& aRequest, nlohmann::json& aResp
 
 void Server::tankGameLoop()
 {
-    auto gameRate = new RateController(5);
+    auto gameRate = new RateController(30);
 
     while(isRunning())
     {
@@ -170,8 +170,6 @@ void Server::broadcastGameLoop()
     }
 }
 
-// TODO: find a way to avoid always sending all input frames. Feel like I
-//       only need to send when it changes? 
 void Server::clientInputRecvLoop()
 {
     zmq::socket_t clientInputRecvSocket = zmq::socket_t(mContext, zmq::socket_type::pull); 
@@ -187,10 +185,30 @@ void Server::clientInputRecvLoop()
         zmq::message_t input; 
         clientInputRecvSocket.recv(input, zmq::recv_flags::none);
 
-        std::string data(static_cast<char*>(input.data()), input.size());
-        std::cout << "Received: " << data << std::endl;
+        nlohmann::json inputJson = nlohmann::json::parse(input.to_string()); 
+
+        if(!setPlayersLatestInput(InputFrame::fromJson(inputJson)))
+            std::cout << "Failed to update input for unknown player id\n"; 
 
         clientInputRecvRate->block(); 
     }
 
+}
+
+bool Server::setPlayersLatestInput(const InputFrame& anInput)
+{
+    if(mPlayers.empty())
+    {
+        // kinda hacky
+        return true; 
+    }
+
+    if(mPlayers.find(anInput.clientId) == mPlayers.end())
+    {   
+        std::cout << "Unknown player id: " << anInput.clientId << "\n"; 
+        return false; 
+    }
+
+    mPlayers.at(anInput.clientId)->setInput(anInput); 
+    return true; 
 }

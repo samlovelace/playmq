@@ -14,5 +14,8 @@ Player::~Player()
 
 bool Player::update()
 {   
-    mState.x += 1; 
+    float speed = 10; 
+
+    mState.x += speed * mInput.moveX; 
+    mState.y += speed * mInput.moveY; 
 }

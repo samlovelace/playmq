@@ -117,6 +117,8 @@ void Client::gameStateRecvLoop()
     }
 }
 
+// TODO: find a way to avoid always sending all input frames. Feel like I
+//       only need to send when it changes? 
 void Client::sendUserInputLoop()
 {
     zmq::socket_t inputSendSocket = zmq::socket_t(mContext, zmq::socket_type::push); 
@@ -136,9 +138,6 @@ void Client::sendUserInputLoop()
         {
             latest.clientId = mId; 
         }
-
-        
-
 
         nlohmann::json frame = latest.toJson(); 
 
